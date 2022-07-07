@@ -21,6 +21,8 @@
 		"prettier/prettier": "error",
 		"simple-import-sort/sort": "off",
 		"import/no-unresolved": "off",
-		"import/extensions": "off"
+		"import/extensions": "off",
+		"@typescript-eslint/no-empty-interface": "off",
+		"no-console": "off"
 	}
 }
