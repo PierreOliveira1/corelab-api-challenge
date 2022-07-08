@@ -1,7 +1,7 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import database from '../../database';
 
-type VehicleAttributes = {
+export type VehicleAttributes = {
 	id: string;
 	name: string;
 	brand: string;
@@ -13,7 +13,7 @@ type VehicleAttributes = {
 };
 
 export interface VehicleAttributesOptional
-	extends Optional<VehicleAttributes, 'id' | 'createdAt'> {}
+	extends Optional<VehicleAttributes, 'id' | 'createdAt' | 'updatedAt'> {}
 
 interface VehicleModel
 	extends Model<VehicleAttributes, VehicleAttributesOptional>,
@@ -59,6 +59,7 @@ const Vehicle = database.define<VehicleModel>(
 		},
 		updatedAt: {
 			type: DataTypes.DATE,
+			defaultValue: new Date(),
 			allowNull: false,
 		},
 	},
