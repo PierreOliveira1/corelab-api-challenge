@@ -16,6 +16,7 @@ describe('Route vehicle', () => {
 		color: 'Rosa',
 		year: 2010,
 		board: 'ABC1235',
+		updatedAt: new Date(),
 	};
 
 	it('should add new vehicle', async () => {
@@ -23,7 +24,7 @@ describe('Route vehicle', () => {
 
 		const resBody: VehicleAttributes = res.body;
 
-		expect(res.statusCode).toEqual(200);
+		expect(res.statusCode).toEqual(201);
 		expect(uuidValidate(resBody.id)).toBeTruthy();
 		expect(resBody.name).toBe(vehicle.name);
 		expect(resBody.brand).toBe(vehicle.brand);
@@ -52,5 +53,81 @@ describe('Route vehicle', () => {
 		expect(resBody.message).toBe('This board already exists');
 
 		await deleteVehicle(vehicle1.id);
+	});
+
+	it('should get all vehicles', async () => {
+		await Vehicle.truncate();
+		const vehicle1: VehicleAttributes = await Vehicle.create({
+			name: vehicle.name,
+			brand: vehicle.brand,
+			color: vehicle.color,
+			year: 2010,
+			board: 'ABC987645',
+			updatedAt: vehicle.updatedAt,
+		});
+		const vehicle2: VehicleAttributes = await Vehicle.create({
+			name: vehicle.name,
+			brand: vehicle.brand,
+			color: vehicle.color,
+			year: 2011,
+			board: 'ABC5432456',
+			updatedAt: vehicle.updatedAt,
+		});
+		const vehicle3: VehicleAttributes = await Vehicle.create({
+			name: vehicle.name,
+			brand: vehicle.brand,
+			color: vehicle.color,
+			year: 2012,
+			board: 'ABC1239456',
+			updatedAt: vehicle.updatedAt,
+		});
+
+		console.log('VEHICLE1', vehicle1);
+		console.log('VEHICLE2', vehicle2);
+		console.log('VEHICLE3', vehicle3);
+
+		const res = await request(app).get('/vehicle/all');
+		const resB: VehicleAttributes[] = res.body;
+		const resBody: VehicleAttributes[] = resB.sort((a, b) => {
+			if (a.year > b.year) return 1;
+			if (a.year < b.year) return -1;
+			return 0;
+		});
+
+		expect(res.statusCode).toEqual(200);
+
+		// vehicle1
+		expect(uuidValidate(resBody[0].id)).toBeTruthy();
+		expect(resBody[0].name).toBe(vehicle1.name);
+		expect(resBody[0].brand).toBe(vehicle1.brand);
+		expect(resBody[0].color).toBe(vehicle1.color);
+		expect(resBody[0].year).toBe(vehicle1.year);
+		expect(resBody[0].board).toBe(vehicle1.board);
+		expect(isDateValid(new Date(resBody[0].createdAt))).toBeTruthy();
+		expect(isDateValid(new Date(resBody[0].updatedAt))).toBeTruthy();
+
+		// vehicle2
+		expect(uuidValidate(resBody[1].id)).toBeTruthy();
+		expect(resBody[1].name).toBe(vehicle2.name);
+		expect(resBody[1].brand).toBe(vehicle2.brand);
+		expect(resBody[1].color).toBe(vehicle2.color);
+		expect(resBody[1].year).toBe(vehicle2.year);
+		expect(resBody[1].board).toBe(vehicle2.board);
+		expect(isDateValid(new Date(resBody[1].createdAt))).toBeTruthy();
+		expect(isDateValid(new Date(resBody[1].updatedAt))).toBeTruthy();
+
+		// vehicle3
+		expect(uuidValidate(resBody[2].id)).toBeTruthy();
+		expect(resBody[2].name).toBe(vehicle3.name);
+		expect(resBody[2].brand).toBe(vehicle3.brand);
+		expect(resBody[2].color).toBe(vehicle3.color);
+		expect(resBody[2].year).toBe(vehicle3.year);
+		expect(resBody[2].board).toBe(vehicle3.board);
+		expect(isDateValid(new Date(resBody[2].createdAt))).toBeTruthy();
+		expect(isDateValid(new Date(resBody[2].updatedAt))).toBeTruthy();
+
+		await deleteVehicle(vehicle1.id);
+		await deleteVehicle(vehicle2.id);
+		await deleteVehicle(vehicle3.id);
 	});
 });

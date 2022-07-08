@@ -13,6 +13,7 @@ describe('Vehicle Model', () => {
 			color: 'Verde',
 			year: 2010,
 			board: 'ABC1525',
+			updatedAt: new Date(),
 		};
 
 		const newVehicle = await Vehicle.create(vehicle);

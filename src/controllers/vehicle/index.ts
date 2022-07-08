@@ -23,9 +23,20 @@ VehicleRouter.post('/add', async (req: Request, res: Response) => {
 			updatedAt: new Date(),
 		});
 
-		res.status(200).send(vehicle);
+		res.status(201).send(vehicle);
 	} catch (err) {
 		res.status(400).send({ error: true, message: 'Error adding vehicle' });
+	}
+});
+
+VehicleRouter.get('/all', async (req: Request, res: Response) => {
+	try {
+		const allVehicles = await Vehicle.findAll();
+		res.status(200).send(allVehicles);
+	} catch (error) {
+		res
+			.status(400)
+			.send({ error: true, message: 'Error when searching all vehicles' });
 	}
 });
 

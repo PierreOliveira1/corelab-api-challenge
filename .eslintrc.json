@@ -24,6 +24,7 @@
 		"import/extensions": "off",
 		"@typescript-eslint/no-empty-interface": "off",
 		"no-console": "off",
-		"consistent-return": "off"
+		"consistent-return": "off",
+		"no-plusplus": "off"
 	}
 }

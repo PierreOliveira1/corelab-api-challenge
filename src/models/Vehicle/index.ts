@@ -13,7 +13,7 @@ export type VehicleAttributes = {
 };
 
 export interface VehicleAttributesOptional
-	extends Optional<VehicleAttributes, 'id' | 'createdAt' | 'updatedAt'> {}
+	extends Optional<VehicleAttributes, 'id' | 'createdAt'> {}
 
 interface VehicleModel
 	extends Model<VehicleAttributes, VehicleAttributesOptional>,
@@ -59,7 +59,6 @@ const Vehicle = database.define<VehicleModel>(
 		},
 		updatedAt: {
 			type: DataTypes.DATE,
-			defaultValue: new Date(),
 			allowNull: false,
 		},
 	},

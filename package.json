@@ -4,7 +4,7 @@
   "main": "./build/server.js",
   "scripts": {
     "build": "rimraf ./build && tsc",
-    "dev": "NODE_ENV=test ts-node-dev --respawn --transpile-only --inspect --./src/server.ts",
+    "dev": "NODE_ENV=test ts-node-dev --respawn --transpile-only --inspect -- ./src/server.ts",
     "test": "NODE_ENV=test jest",
     "lint": "eslint --fix --ext .ts,.js,.json ./src"
   },
