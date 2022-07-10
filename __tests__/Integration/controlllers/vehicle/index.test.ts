@@ -260,4 +260,74 @@ describe('Route vehicle', () => {
 
 		await deleteUser(user1.id);
 	});
+
+	it('should get my vehicles', async () => {
+		const user1 = await User.create(user);
+		const user2 = await User.create({
+			...user,
+			email: 'teste@gmail.com',
+		});
+		const vehicle1 = await Vehicle.create({
+			...vehicle,
+			userId: user1.id,
+		});
+		const vehicle2 = await Vehicle.create({
+			...vehicle,
+			userId: user1.id,
+			board: 'AAAAAA',
+			year: 2011,
+		});
+		const vehicle3 = await Vehicle.create({
+			...vehicle,
+			userId: user2.id,
+			board: 'BBBBB',
+			year: 2012,
+		});
+
+		const res = await request(app)
+			.get('/vehicle/my')
+			.set('Authorization', `Bearer ${user1.generateToken()}`);
+
+		const resBody: VehicleAttributesOptional[] = res.body.sort(
+			(a: VehicleAttributesOptional, b: VehicleAttributesOptional) => {
+				if (a.year > b.year) return 1;
+				if (a.year < b.year) return -1;
+				return 0;
+			}
+		);
+
+		expect(res.statusCode).toEqual(200);
+
+		// Vehicle1
+		expect(uuidValidate(resBody[0].id as string)).toBeTruthy();
+		expect(uuidValidate(resBody[0].userId as string)).toBeTruthy();
+		expect(resBody[0].name).toBe(vehicle1.name);
+		expect(resBody[0].description).toBe(vehicle1.description);
+		expect(resBody[0].brand).toBe(vehicle1.brand);
+		expect(resBody[0].color).toBe(vehicle1.color);
+		expect(resBody[0].year).toBe(vehicle1.year);
+		expect(resBody[0].board).toBe(vehicle1.board);
+		expect(resBody[0].price).toBe(vehicle1.price);
+		expect(isDateValid(new Date(resBody[0].createdAt as Date))).toBeTruthy();
+		expect(isDateValid(new Date(resBody[0].updatedAt))).toBeTruthy();
+
+		// Vehicle2
+		expect(uuidValidate(resBody[1].id as string)).toBeTruthy();
+		expect(uuidValidate(resBody[1].userId as string)).toBeTruthy();
+		expect(resBody[1].name).toBe(vehicle2.name);
+		expect(resBody[1].description).toBe(vehicle2.description);
+		expect(resBody[1].brand).toBe(vehicle2.brand);
+		expect(resBody[1].color).toBe(vehicle2.color);
+		expect(resBody[1].year).toBe(vehicle2.year);
+		expect(resBody[1].board).toBe(vehicle2.board);
+		expect(resBody[1].price).toBe(vehicle2.price);
+		expect(isDateValid(new Date(resBody[1].createdAt as Date))).toBeTruthy();
+		expect(isDateValid(new Date(resBody[1].updatedAt))).toBeTruthy();
+
+		await deleteVehicle(vehicle1.id);
+		await deleteVehicle(vehicle2.id);
+		await deleteVehicle(vehicle3.id);
+		await deleteUser(user1.id);
+		await deleteUser(user2.id);
+	});
 });

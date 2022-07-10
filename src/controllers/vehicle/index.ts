@@ -53,6 +53,20 @@ VehicleRouter.get('/all', checkToken, async (req: Request, res: Response) => {
 	}
 });
 
+VehicleRouter.get('/my', checkToken, async (req: Request, res: Response) => {
+	try {
+		const myVehicles = await Vehicle.findAll({
+			where: { userId: res.locals.id },
+		});
+
+		return res.status(200).send(myVehicles);
+	} catch (err) {
+		return res
+			.status(400)
+			.send({ error: true, message: 'Error searching your vehicles' });
+	}
+});
+
 VehicleRouter.put(
 	'/update/:id',
 	checkToken,
