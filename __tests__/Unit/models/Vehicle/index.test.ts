@@ -1,13 +1,23 @@
 import Vehicle, {
 	VehicleAttributesOptional,
 } from '../../../../src/models/Vehicle';
+import User from '../../../../src/models/User';
 import uuidValidate from '../../../utils/uuidValidate';
 import deleteVehicle from '../../../utils/deleteVehicle';
 import isDateValid from '../../../utils/isDateValid';
+import deleteUser from '../../../utils/deleteUser';
 
 describe('Vehicle Model', () => {
 	it('should create new vehicle', async () => {
+		const user = await User.create({
+			firstName: 'Pierre',
+			lastName: 'Oliveira',
+			email: 'pierre@gmail.com',
+			password: '123456789',
+			updatedAt: new Date(),
+		});
 		const vehicle: VehicleAttributesOptional = {
+			userId: user.id,
 			name: 'Uno',
 			description: 'Novo zero km',
 			brand: 'Fiat',
@@ -32,5 +42,6 @@ describe('Vehicle Model', () => {
 		expect(isDateValid(newVehicle.updatedAt)).toBeTruthy();
 
 		await deleteVehicle(newVehicle.id);
+		await deleteUser(user.id);
 	});
 });

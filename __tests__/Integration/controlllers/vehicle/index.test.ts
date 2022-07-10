@@ -5,11 +5,21 @@ import Vehicle, {
 	VehicleAttributes,
 	VehicleAttributesOptional,
 } from '../../../../src/models/Vehicle';
+import User, { UserOptional } from '../../../../src/models/User';
 import isDateValid from '../../../utils/isDateValid';
 import uuidValidate from '../../../utils/uuidValidate';
 import deleteVehicle from '../../../utils/deleteVehicle';
+import deleteUser from '../../../utils/deleteUser';
 
 describe('Route vehicle', () => {
+	const user: UserOptional = {
+		firstName: 'Pierre',
+		lastName: 'Oliveira',
+		email: 'pierre@gmail.com',
+		password: '123456789',
+		updatedAt: new Date(),
+	};
+
 	const vehicle: VehicleAttributesOptional = {
 		name: 'Uno',
 		description: 'Novo zero km',
@@ -22,7 +32,11 @@ describe('Route vehicle', () => {
 	};
 
 	it('should add new vehicle', async () => {
-		const res = await request(app).post('/vehicle/add').send(vehicle);
+		const user1 = await User.create(user);
+		const res = await request(app)
+			.post('/vehicle/add')
+			.set('Authorization', `Bearer ${user1.generateToken()}`)
+			.send(vehicle);
 
 		const resBody: VehicleAttributes = res.body;
 
@@ -39,11 +53,19 @@ describe('Route vehicle', () => {
 		expect(isDateValid(new Date(resBody.updatedAt))).toBeTruthy();
 
 		await deleteVehicle(resBody.id);
+		await deleteUser(user1.id);
 	});
 
 	it('should error vehicle already exists', async () => {
-		const vehicle1: VehicleAttributes = await Vehicle.create(vehicle);
-		const res = await request(app).post('/vehicle/add').send(vehicle);
+		const user1 = await User.create(user);
+		const vehicle1: VehicleAttributes = await Vehicle.create({
+			...vehicle,
+			userId: user1.id,
+		});
+		const res = await request(app)
+			.post('/vehicle/add')
+			.set('Authorization', `Bearer ${user1.generateToken()}`)
+			.send(vehicle);
 
 		type ErrorBody = {
 			error: boolean;
@@ -57,27 +79,34 @@ describe('Route vehicle', () => {
 		expect(resBody.message).toBe('This board already exists');
 
 		await deleteVehicle(vehicle1.id);
+		await deleteUser(user1.id);
 	});
 
 	it('should get all vehicles', async () => {
+		const user1 = await User.create(user);
 		await Vehicle.truncate();
 		const vehicle1: VehicleAttributes = await Vehicle.create({
 			...vehicle,
 			year: 2010,
 			board: 'ABC987645',
+			userId: user1.id,
 		});
 		const vehicle2: VehicleAttributes = await Vehicle.create({
 			...vehicle,
 			year: 2011,
 			board: 'ABC5432456',
+			userId: user1.id,
 		});
 		const vehicle3: VehicleAttributes = await Vehicle.create({
 			...vehicle,
 			year: 2012,
 			board: 'ABC1239456',
+			userId: user1.id,
 		});
 
-		const res = await request(app).get('/vehicle/all');
+		const res = await request(app)
+			.get('/vehicle/all')
+			.set('Authorization', `Bearer ${user1.generateToken()}`);
 		const resB: VehicleAttributes[] = res.body;
 		const resBody: VehicleAttributes[] = resB.sort((a, b) => {
 			if (a.year > b.year) return 1;
@@ -89,6 +118,7 @@ describe('Route vehicle', () => {
 
 		// vehicle1
 		expect(uuidValidate(resBody[0].id)).toBeTruthy();
+		expect(uuidValidate(resBody[0].userId)).toBeTruthy();
 		expect(resBody[0].name).toBe(vehicle1.name);
 		expect(resBody[0].description).toBe(vehicle1.description);
 		expect(resBody[0].brand).toBe(vehicle1.brand);
@@ -101,6 +131,7 @@ describe('Route vehicle', () => {
 
 		// vehicle2
 		expect(uuidValidate(resBody[1].id)).toBeTruthy();
+		expect(uuidValidate(resBody[0].userId)).toBeTruthy();
 		expect(resBody[1].name).toBe(vehicle2.name);
 		expect(resBody[1].description).toBe(vehicle2.description);
 		expect(resBody[1].brand).toBe(vehicle2.brand);
@@ -113,6 +144,7 @@ describe('Route vehicle', () => {
 
 		// vehicle3
 		expect(uuidValidate(resBody[2].id)).toBeTruthy();
+		expect(uuidValidate(resBody[0].userId)).toBeTruthy();
 		expect(resBody[2].name).toBe(vehicle3.name);
 		expect(resBody[2].description).toBe(vehicle3.description);
 		expect(resBody[2].brand).toBe(vehicle3.brand);
@@ -126,15 +158,23 @@ describe('Route vehicle', () => {
 		await deleteVehicle(vehicle1.id);
 		await deleteVehicle(vehicle2.id);
 		await deleteVehicle(vehicle3.id);
+		await deleteUser(user1.id);
 	});
 
 	it('should update vehicle', async () => {
-		const vehicle1 = await Vehicle.create(vehicle);
-
-		const res = await request(app).put(`/vehicle/update/${vehicle1.id}`).send({
-			name: 'Siena',
-			color: 'Verde',
+		const user1 = await User.create(user);
+		const vehicle1 = await Vehicle.create({
+			...vehicle,
+			userId: user1.id,
 		});
+
+		const res = await request(app)
+			.put(`/vehicle/update/${vehicle1.id}`)
+			.set('Authorization', `Bearer ${user1.generateToken()}`)
+			.send({
+				name: 'Siena',
+				color: 'Verde',
+			});
 
 		interface ResBody {
 			updated: boolean;
@@ -146,6 +186,7 @@ describe('Route vehicle', () => {
 		expect(res.statusCode).toEqual(200);
 		expect(updated).toBeTruthy();
 		expect(getVehicle?.id).toBe(vehicle1.id);
+		expect(getVehicle?.userId).toBe(user1.id);
 		expect(getVehicle?.brand).toBe(vehicle1.brand);
 		expect(getVehicle?.name).toBe('Siena');
 		expect(getVehicle?.description).toBe(vehicle1.description);
@@ -160,15 +201,23 @@ describe('Route vehicle', () => {
 		);
 
 		await deleteVehicle(vehicle1.id);
+		await deleteUser(user1.id);
 	});
 
 	it('should not update vehicle id and createAt', async () => {
-		const vehicle1 = await Vehicle.create(vehicle);
-
-		const res = await request(app).put(`/vehicle/update/${vehicle1.id}`).send({
-			id: 'Pierre',
-			createdAt: new Date(),
+		const user1 = await User.create(user);
+		const vehicle1 = await Vehicle.create({
+			...vehicle,
+			userId: user1.id,
 		});
+
+		const res = await request(app)
+			.put(`/vehicle/update/${vehicle1.id}`)
+			.set('Authorization', `Bearer ${user1.generateToken()}`)
+			.send({
+				id: 'Pierre',
+				createdAt: new Date(),
+			});
 
 		interface ResBody {
 			updated: boolean;
@@ -186,12 +235,19 @@ describe('Route vehicle', () => {
 		);
 
 		await deleteVehicle(vehicle1.id);
+		await deleteUser(user1.id);
 	});
 
 	it('should delete vehicle', async () => {
-		const vehicle1 = await Vehicle.create(vehicle);
+		const user1 = await User.create(user);
+		const vehicle1 = await Vehicle.create({
+			...vehicle,
+			userId: user1.id,
+		});
 
-		const res = await request(app).delete(`/vehicle/delete/${vehicle1.id}`);
+		const res = await request(app)
+			.delete(`/vehicle/delete/${vehicle1.id}`)
+			.set('Authorization', `Bearer ${user1.generateToken()}`);
 
 		interface ResBody {
 			deleted: boolean;
@@ -201,5 +257,7 @@ describe('Route vehicle', () => {
 
 		expect(res.statusCode).toEqual(200);
 		expect(deleted).toBeTruthy();
+
+		await deleteUser(user1.id);
 	});
 });

@@ -3,6 +3,7 @@ import database from '../../database';
 
 export type VehicleAttributes = {
 	id: string;
+	userId: string;
 	name: string;
 	description: string;
 	brand: string;
@@ -15,7 +16,7 @@ export type VehicleAttributes = {
 };
 
 export interface VehicleAttributesOptional
-	extends Optional<VehicleAttributes, 'id' | 'createdAt'> {}
+	extends Optional<VehicleAttributes, 'id' | 'userId' | 'createdAt'> {}
 
 interface VehicleModel
 	extends Model<VehicleAttributes, VehicleAttributesOptional>,
@@ -28,6 +29,10 @@ const Vehicle = database.define<VehicleModel>(
 			type: DataTypes.UUID,
 			defaultValue: DataTypes.UUIDV4,
 			primaryKey: true,
+			allowNull: false,
+		},
+		userId: {
+			type: DataTypes.UUID,
 			allowNull: false,
 		},
 		name: {
