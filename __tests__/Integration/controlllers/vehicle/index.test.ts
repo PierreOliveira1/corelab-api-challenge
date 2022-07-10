@@ -82,10 +82,6 @@ describe('Route vehicle', () => {
 			updatedAt: vehicle.updatedAt,
 		});
 
-		console.log('VEHICLE1', vehicle1);
-		console.log('VEHICLE2', vehicle2);
-		console.log('VEHICLE3', vehicle3);
-
 		const res = await request(app).get('/vehicle/all');
 		const resB: VehicleAttributes[] = res.body;
 		const resBody: VehicleAttributes[] = resB.sort((a, b) => {
@@ -129,5 +125,61 @@ describe('Route vehicle', () => {
 		await deleteVehicle(vehicle1.id);
 		await deleteVehicle(vehicle2.id);
 		await deleteVehicle(vehicle3.id);
+	});
+
+	it('should update vehicle', async () => {
+		const vehicle1 = await Vehicle.create(vehicle);
+
+		const res = await request(app).put(`/vehicle/update/${vehicle1.id}`).send({
+			name: 'Siena',
+			color: 'Verde',
+		});
+
+		interface ResBody {
+			updated: boolean;
+		}
+		const { updated }: ResBody = res.body;
+
+		const getVehicle = await Vehicle.findOne({ where: { id: vehicle1.id } });
+
+		expect(res.statusCode).toEqual(200);
+		expect(updated).toBeTruthy();
+		expect(getVehicle?.id).toBe(vehicle1.id);
+		expect(getVehicle?.brand).toBe(vehicle1.brand);
+		expect(getVehicle?.name).toBe('Siena');
+		expect(getVehicle?.color).toBe('Verde');
+		expect(getVehicle?.board).toBe(vehicle1.board);
+		expect(new Date(getVehicle?.createdAt as Date).toLocaleString()).toBe(
+			new Date(vehicle1.createdAt).toLocaleString()
+		);
+		expect(new Date(getVehicle?.updatedAt as Date)).not.toBe(
+			new Date(vehicle1.updatedAt)
+		);
+
+		await deleteVehicle(vehicle1.id);
+	});
+
+	it('should not update vehicle id and createAt', async () => {
+		const vehicle1 = await Vehicle.create(vehicle);
+
+		const res = await request(app).put(`/vehicle/update/${vehicle1.id}`).send({
+			id: 'Pierre',
+			createdAt: new Date(),
+		});
+
+		interface ResBody {
+			updated: boolean;
+		}
+
+		const { updated }: ResBody = res.body;
+
+		const getVehicle = await Vehicle.findOne({ where: { id: vehicle1.id } });
+
+		expect(res.statusCode).toEqual(200);
+		expect(updated).not.toBeTruthy();
+		expect(getVehicle?.id).toBe(vehicle1.id);
+		expect(new Date(getVehicle?.createdAt as Date).toLocaleString()).toBe(
+			new Date(vehicle1.createdAt).toLocaleString()
+		);
 	});
 });

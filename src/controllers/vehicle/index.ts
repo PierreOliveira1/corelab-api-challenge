@@ -33,10 +33,27 @@ VehicleRouter.get('/all', async (req: Request, res: Response) => {
 	try {
 		const allVehicles = await Vehicle.findAll();
 		res.status(200).send(allVehicles);
-	} catch (error) {
+	} catch (err) {
 		res
 			.status(400)
 			.send({ error: true, message: 'Error when searching all vehicles' });
+	}
+});
+
+VehicleRouter.put('/update/:id', async (req: Request, res: Response) => {
+	const data: VehicleAttributesOptional = req.body;
+	try {
+		data.id = undefined;
+		data.createdAt = undefined;
+		data.updatedAt = new Date();
+
+		const [updated] = await Vehicle.update(data, {
+			where: { id: req.params.id },
+		});
+
+		res.status(200).send({ updated: updated !== 0 });
+	} catch (err) {
+		res.status(400).send({ error: true, message: 'Error updating vehicle' });
 	}
 });
 
