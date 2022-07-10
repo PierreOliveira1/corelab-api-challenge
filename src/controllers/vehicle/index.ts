@@ -4,8 +4,15 @@ import Vehicle, { VehicleAttributesOptional } from '../../models/Vehicle';
 const VehicleRouter = Router();
 
 VehicleRouter.post('/add', async (req: Request, res: Response) => {
-	const { name, brand, color, year, board }: VehicleAttributesOptional =
-		req.body;
+	const {
+		name,
+		description,
+		brand,
+		color,
+		year,
+		board,
+		price,
+	}: VehicleAttributesOptional = req.body;
 
 	try {
 		if (await Vehicle.findOne({ where: { board } })) {
@@ -16,10 +23,12 @@ VehicleRouter.post('/add', async (req: Request, res: Response) => {
 
 		const vehicle = await Vehicle.create({
 			name,
+			description,
 			brand,
 			color,
 			year,
 			board,
+			price,
 			updatedAt: new Date(),
 		});
 

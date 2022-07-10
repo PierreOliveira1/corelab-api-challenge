@@ -4,10 +4,12 @@ import database from '../../database';
 export type VehicleAttributes = {
 	id: string;
 	name: string;
+	description: string;
 	brand: string;
 	color: string;
 	year: number;
 	board: string;
+	price: number;
 	createdAt: Date;
 	updatedAt: Date;
 };
@@ -32,6 +34,10 @@ const Vehicle = database.define<VehicleModel>(
 			type: DataTypes.STRING,
 			allowNull: false,
 		},
+		description: {
+			type: DataTypes.TEXT,
+			allowNull: false,
+		},
 		brand: {
 			type: DataTypes.STRING,
 			allowNull: false,
@@ -51,6 +57,10 @@ const Vehicle = database.define<VehicleModel>(
 			set(value: string) {
 				this.setDataValue('board', value.toUpperCase());
 			},
+		},
+		price: {
+			type: DataTypes.NUMBER,
+			allowNull: false,
 		},
 		createdAt: {
 			type: DataTypes.DATE,
