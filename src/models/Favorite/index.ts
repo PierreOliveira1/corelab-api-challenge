@@ -1,13 +1,16 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import database from '../../database';
 
-type FavoriteAttributes = {
+export type FavoriteAttributes = {
 	id: string;
 	userId: string;
 	vehicleId: string;
+	createdAt: Date;
+	updatedAt: Date;
 };
 
-interface FavoriteOptional extends Optional<FavoriteAttributes, 'id'> {}
+export interface FavoriteOptional
+	extends Optional<FavoriteAttributes, 'id' | 'createdAt'> {}
 
 interface FavoriteModel
 	extends Model<FavoriteAttributes, FavoriteOptional>,
@@ -28,6 +31,15 @@ const Favorite = database.define<FavoriteModel>(
 		},
 		vehicleId: {
 			type: DataTypes.UUID,
+			allowNull: false,
+		},
+		createdAt: {
+			type: DataTypes.DATE,
+			defaultValue: new Date(),
+			allowNull: false,
+		},
+		updatedAt: {
+			type: DataTypes.DATE,
 			allowNull: false,
 		},
 	},
