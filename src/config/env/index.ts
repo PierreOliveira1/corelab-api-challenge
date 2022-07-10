@@ -17,6 +17,7 @@ interface IEnvs {
 	DB_NAME: string;
 	DB_USERNAME: string;
 	DB_PASSWORD: string;
+	JWT_SECRET: string;
 }
 
 const Envs: IEnvs = {
@@ -28,6 +29,7 @@ const Envs: IEnvs = {
 	DB_NAME: `${process.env.DB_NAME}`,
 	DB_USERNAME: `${process.env.DB_USERNAME}`,
 	DB_PASSWORD: `${process.env.DB_PASSWORD}`,
+	JWT_SECRET: `${process.env.JWT_SECRET}`,
 };
 
 export default Envs;

@@ -65,7 +65,7 @@ const Vehicle = database.define<VehicleModel>(
 		createdAt: {
 			type: DataTypes.DATE,
 			defaultValue: new Date(),
-			allowNull: true,
+			allowNull: false,
 		},
 		updatedAt: {
 			type: DataTypes.DATE,
