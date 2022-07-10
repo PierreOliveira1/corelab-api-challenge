@@ -181,5 +181,22 @@ describe('Route vehicle', () => {
 		expect(new Date(getVehicle?.createdAt as Date).toLocaleString()).toBe(
 			new Date(vehicle1.createdAt).toLocaleString()
 		);
+
+		await deleteVehicle(vehicle1.id);
+	});
+
+	it('should delete vehicle', async () => {
+		const vehicle1 = await Vehicle.create(vehicle);
+
+		const res = await request(app).delete(`/vehicle/delete/${vehicle1.id}`);
+
+		interface ResBody {
+			deleted: boolean;
+		}
+
+		const { deleted }: ResBody = res.body;
+
+		expect(res.statusCode).toEqual(200);
+		expect(deleted).toBeTruthy();
 	});
 });

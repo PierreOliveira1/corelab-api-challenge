@@ -57,4 +57,17 @@ VehicleRouter.put('/update/:id', async (req: Request, res: Response) => {
 	}
 });
 
+VehicleRouter.delete('/delete/:id', async (req: Request, res: Response) => {
+	try {
+		const { id } = req.params;
+		const vehicle = await Vehicle.findOne({ where: { id } });
+		await vehicle?.destroy();
+		res.status(200).send({ deleted: true });
+	} catch (err) {
+		res
+			.status(400)
+			.send({ error: true, message: 'Error when deleting vehicle' });
+	}
+});
+
 export default VehicleRouter;
