@@ -1,6 +1,7 @@
 import { Request, Response, Router } from 'express';
 import Vehicle, { VehicleAttributesOptional } from '../../models/Vehicle';
 import checkToken from '../../middlewares/checkToken';
+import Favorite from '../../models/Favorite';
 
 const VehicleRouter = Router();
 
@@ -100,6 +101,8 @@ VehicleRouter.delete(
 			const vehicle = await Vehicle.findOne({
 				where: { id, userId: res.locals.id },
 			});
+
+			await Favorite.destroy({ where: { vehicleId: id } });
 			await vehicle?.destroy();
 
 			return res.status(200).send({ deleted: true });
