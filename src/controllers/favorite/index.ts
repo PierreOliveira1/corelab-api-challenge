@@ -27,4 +27,21 @@ FavoriteRouter.post('/add', checkToken, async (req: Request, res: Response) => {
 	}
 });
 
+FavoriteRouter.delete(
+	'/delete/:id',
+	checkToken,
+	async (req: Request, res: Response) => {
+		try {
+			const favorite = await Favorite.findOne({ where: { id: req.params.id } });
+			await favorite?.destroy();
+
+			return res.status(200).send({ deleted: true });
+		} catch (err) {
+			return res
+				.status(400)
+				.send({ error: true, message: 'Error deleting favorite' });
+		}
+	}
+);
+
 export default FavoriteRouter;
