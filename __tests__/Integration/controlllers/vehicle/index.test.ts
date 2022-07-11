@@ -10,6 +10,7 @@ import isDateValid from '../../../utils/isDateValid';
 import uuidValidate from '../../../utils/uuidValidate';
 import deleteVehicle from '../../../utils/deleteVehicle';
 import deleteUser from '../../../utils/deleteUser';
+import Favorite from '../../../../src/models/Favorite';
 
 describe('Route vehicle', () => {
 	const user: UserOptional = {
@@ -327,6 +328,43 @@ describe('Route vehicle', () => {
 		await deleteVehicle(vehicle1.id);
 		await deleteVehicle(vehicle2.id);
 		await deleteVehicle(vehicle3.id);
+		await deleteUser(user1.id);
+		await deleteUser(user2.id);
+	});
+
+	it('Delete vehicle and all favorites', async () => {
+		const user1 = await User.create(user);
+		const user2 = await User.create({
+			...user,
+			email: 'teste@gmail.com',
+		});
+		const vehicle1 = await Vehicle.create({
+			...vehicle,
+			userId: user1.id,
+		});
+		await Favorite.create({
+			userId: user1.id,
+			vehicleId: vehicle1.id,
+			updatedAt: new Date(),
+		});
+		await Favorite.create({
+			userId: user2.id,
+			vehicleId: vehicle1.id,
+			updatedAt: new Date(),
+		});
+
+		const res = await request(app)
+			.delete(`/vehicle/delete/${vehicle1.id}`)
+			.set('Authorization', `Bearer ${user1.generateToken()}`);
+
+		const favorites = await Favorite.findAll({
+			where: { vehicleId: vehicle1.id },
+		});
+
+		expect(res.statusCode).toEqual(200);
+		expect(favorites.length).toEqual(0);
+
+		await deleteVehicle(vehicle1.id);
 		await deleteUser(user1.id);
 		await deleteUser(user2.id);
 	});
